@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+   <html lang="en">
+   <head>
+       <meta charset="UTF-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <title>Course Outline</title>
+   </head>
+   <body>
+       <h1>List of Questions for each class to be based on</h1>
+       <ul>
+           {% for element in qs %}
+           <li>
+               {{ element }}
+               <a href="{{ url_for('session', topic=element) }}"><button>Start from here</button></a>
+           </li>
+           {% endfor %}
+       </ul>
+   </body>
+   </html>

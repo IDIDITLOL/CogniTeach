@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+  <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+  <!-- </speechsdkref> -->
+
+  <!-- <quickstartcode> -->
+  <!-- Speech SDK USAGE -->
+  <script>
+    // status fields and start button in UI
+    var phraseDiv;
+    var startRecognizeOnceAsyncButton;
+
+    // subscription key and region for speech services.
+    var subscriptionKey, serviceRegion;
+    var SpeechSDK;
+    var recognizer;
+
+    document.addEventListener("DOMContentLoaded", function () {
+      startRecognizeOnceAsyncButton = document.getElementById("startRecognizeOnceAsyncButton");
+      subscriptionKey = "8f0b068bc2f246509f2b26884bf739ee";
+      serviceRegion = "eastus";
+      phraseDiv = document.getElementById("phraseDiv");
+
+      startRecognizeOnceAsyncButton.addEventListener("click", function () {
+        startRecognizeOnceAsyncButton.disabled = true;
+        phraseDiv.innerHTML = "";
+
+        if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
+          alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
+          return;
+        }
+        var speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
+
+        speechConfig.speechRecognitionLanguage = "en-US";
+        var audioConfig  = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+        recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+
+        recognizer.recognizeOnceAsync(
+          function (result) {
+            startRecognizeOnceAsyncButton.disabled = false;
+            phraseDiv.innerHTML += result.text;
+            window.console.log(result);
+
+            recognizer.close();
+            recognizer = undefined;
+          },
+          function (err) {
+            startRecognizeOnceAsyncButton.disabled = false;
+            phraseDiv.innerHTML += err;
+            window.console.log(err);
+
+            recognizer.close();
+            recognizer = undefined;
+          });
+      });
+
+      if (!!window.SpeechSDK) {
+        SpeechSDK = window.SpeechSDK;
+        startRecognizeOnceAsyncButton.disabled = false;
+      }
+
+    const audioElement = document.getElementById('synthesizedAudio');
+    const textDisplay = document.getElementById('textDisplay');
+    let textToSpeak = "{{lecture}}"; // Replace this with the text you want to speak
+
+    function speakAndDisplayText(text) {
+        const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
+        const audioConfig = SpeechSDK.AudioConfig.fromDefaultSpeakerOutput();
+        const speechSynthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig, audioConfig);
+        speechConfig.speechSynthesisVoiceName = "en-US-EmmaNeural";
+
+        speechSynthesizer.speakTextAsync(
+            text,
+            result => {
+                speechSynthesizer.close();
+                const blob = new Blob([result.audioData], { type: 'audio/wav' });
+                const url = URL.createObjectURL(blob);
+                audioElement.src = url;
+                audioElement.play(); // Start playing the audio
+                updateTextAsAudioPlays(text);
+            },
+            error => {
+                console.log(error);
+                speechSynthesizer.close();
+            }
+        );
+    }
+    function updateTextAsAudioPlays(text) {
+        let words = text.split(' '); // Split text into words
+        let currentWordIndex = 0;
+        let wordsPerDisplay = 5; // Number of words to display at a time
+        let displayDuration = 2000; // Display duration for each set of words (in milliseconds)
+
+        function displayWordsChunk() {
+            let displayWords = words.slice(currentWordIndex, currentWordIndex + wordsPerDisplay).join(' ');
+            textDisplay.textContent = displayWords;
+            currentWordIndex += wordsPerDisplay;
+
+            if (currentWordIndex < words.length) {
+                setTimeout(displayWordsChunk, displayDuration);
+            }
+        }
+
+        audioElement.addEventListener('timeupdate', function () {
+            let currentTime = audioElement.currentTime;
+
+            if (currentTime >= audioElement.duration) {
+                textDisplay.textContent = '';
+                return;
+            }
+
+            if (currentWordIndex === 0) {
+                displayWordsChunk();
+            }
+        });
+    }
+
+    speakAndDisplayText(textToSpeak);
+    });
+
+      
+    
+  </script>
+<body>
+<button id="startRecognizeOnceAsyncButton">Speech to Text</button>
+<form method="post">
+  <textarea id="phraseDiv", name="phraseDiv" style="display: inline-block;width:500px;height:200px"></textarea>
+  <input type="submit" value="Ask">
+</form>
+<audio id="synthesizedAudio" controls></audio>
+<p id="textDisplay">uwu</p>
+</body>
+</html>

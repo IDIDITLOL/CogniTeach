@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Session setup</title>
+    </head>
+    <body>
+        <form action="{{ url_for("ss_setup")}}" method="post">
+            <input placeholder="Topic" name="topic">
+            <input placeholder="Desired goal to be achieved" name="goal">
+            <input placeholder="Prior knowledge" name="prior">
+            <input placeholder="Enter keywords" name="keywords">
+            <input placeholder="Total Num of classes" name="classnum">
+            <button type="submit">Lets Go!</button>
+        </form>
+    </body>
+</html>
