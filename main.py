@@ -48,4 +48,4 @@ def session(topic):
 #    speech_synthesis_result=speech_synthesizer.speak_text_async("Hello I love you,""""response.choices[0].message.content""").get()
     return render_template("session.html",lecture="The opened package of potato chips held the answer to the mystery. Both detectives looked at it but failed to realize it was the key to solve the crime. They passed by it assuming it was random trash ensuring that the case would never be solved.")
 if __name__=="__main__":
-    app.run()
+    app.run(debug=True)
