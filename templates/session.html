@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <!-- </speechsdkref> -->
 
   <!-- <quickstartcode> -->
@@ -63,10 +64,9 @@
     const textDisplay = document.getElementById('textDisplay');
     let textToSpeak = "{{lecture}}"; // Replace this with the text you want to speak
 
-    function speakAndDisplayText(text) {
+    function speakAndDisplayText(text, callback) {
         const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
-        const audioConfig = SpeechSDK.AudioConfig.fromDefaultSpeakerOutput();
-        const speechSynthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig, audioConfig);
+        const speechSynthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig);
         speechConfig.speechSynthesisVoiceName = "en-US-EmmaNeural";
 
         speechSynthesizer.speakTextAsync(
@@ -76,8 +76,10 @@
                 const blob = new Blob([result.audioData], { type: 'audio/wav' });
                 const url = URL.createObjectURL(blob);
                 audioElement.src = url;
-                audioElement.play(); // Start playing the audio
                 updateTextAsAudioPlays(text);
+                if (callback) {
+                    callback(); // Invoke the callback function when text-to-speech is completed
+                }
             },
             error => {
                 console.log(error);
@@ -116,18 +118,102 @@
     }
 
     speakAndDisplayText(textToSpeak);
-    });
-
-      
     
+    const imageSets = [
+        {% for image_set in images %}
+        [
+            {% for url in image_set %}
+            '{{ url }}',
+            {% endfor %}
+        ],
+        {% endfor %}
+    ];
+    const textSets = [
+        {% for text_set in board_writings %}
+        
+            '{{ text_set }}',
+        {% endfor %}
+        
+    ];
+    let textIndex = 0; // Global variable to keep track of the current text in the list
+    var textContent = ''; // Global variable to hold the text content
+    const hmmKeyword = 'hmm';
+    var hmmDetected = false;
+
+    var currentImageIndex = 0;
+    const ummKeyword = 'umm';
+    var ummDetected = false;
+    function displayText(newText) {
+      console.log("There fore I am not.")
+      const textDisplay = document.getElementById('BoardText');
+      textContent += newText;
+      textDisplay.innerHTML = textContent;
+    }
+    function updateTextOnKeyword(subtitles) {
+      console.log("Therefore, I am")
+      if (subtitles.includes(hmmKeyword) && !hmmDetected) {
+          hmmDetected = true;
+          const newText = textSets[textIndex];
+          textIndex = (textIndex + 1) % textSets.length; // Update the index for the next text
+          displayText(newText);
+          // Perform any other actions here when keyword is detected
+      } else if (!subtitles.includes(hmmKeyword) && hmmDetected) {
+          hmmDetected = false;
+        // Perform any other actions here when keyword disappears
+      }
+    }
+    function displayImages(images) {
+        const image1 = document.getElementById('img1');
+        const image2 = document.getElementById('img2');
+        const image3 = document.getElementById('img3');
+        image1.src=images[currentImageIndex][0];
+        image2.src=images[currentImageIndex][1];
+        image3.src=images[currentImageIndex][2];
+        currentImageIndex = (currentImageIndex + 1) % images.length;
+    }
+
+    function updateDisplayOnKeyword(subtitles) {
+      if (subtitles.includes(ummKeyword) && !ummDetected) {
+          ummDetected = true;
+          displayImages(imageSets); // Pass the correct imageSets variable here
+      } else if (!subtitles.includes(ummKeyword) && ummDetected) {
+          ummDetected = false;
+      }
+    }
+    setInterval(function () {
+        const currentSubtitle = document.getElementById('textDisplay').textContent.trim();
+        updateDisplayOnKeyword(currentSubtitle);
+        updateTextOnKeyword(currentSubtitle);
+    }, 1000);
+    $('a#process_input').bind('click', function(event) {
+      event.preventDefault();
+      $.getJSON('/askgpt', {
+        phraseDiv: $('textarea[name="phraseDiv"]').val(),
+      }, function(data) {
+        $("#resulter").text(data.result);
+        audioElement.pause();
+                // Play the new text-to-speech result
+        speakAndDisplayText(data.result, function() {
+                    // Resume playing the synthesized audio when text-to-speech is completed
+            audioElement.play();
+      });
+    });
+    });
+  });
   </script>
+
 <body>
 <button id="startRecognizeOnceAsyncButton">Speech to Text</button>
-<form method="post">
-  <textarea id="phraseDiv", name="phraseDiv" style="display: inline-block;width:500px;height:200px"></textarea>
-  <input type="submit" value="Ask">
-</form>
-<audio id="synthesizedAudio" controls></audio>
+<textarea id="phraseDiv" name="phraseDiv" style="display: inline-block; width: 500px; height: 200px"></textarea>
+<a href="#" id="process_input"><button class="btn btn-default">Ask</button></a>
+<div id="resulter">hehehe</div>
+<audio id="synthesizedAudio" autoplay controls></audio>
+<div id="imageDisplay">
+  <img id="img1" width="200" height="150">
+  <img id="img2" width="200" height="150">
+  <img id="img3" width="200" height="150">
+</div>
+<div><p id="BoardText">allah ho akbar</p></div>
 <p id="textDisplay">uwu</p>
 </body>
 </html>
