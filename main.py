@@ -91,10 +91,10 @@ def emotion_detection(url,online=True):
     # Now there is a trained endpoint that can be used to make a prediction
     if online:
         
-            results = predictor.classify_image_url(project_id=uuid.UUID("6c0ac084-adb6-4a3b-945c-b0b8f4cb6c4d"),published_name="Iteration3",url=url)
+            results = predictor.classify_image_url(project_id="6c0ac084-adb6-4a3b-945c-b0b8f4cb6c4d",published_name="Iteration3",url=url)
             return results.predictions[0].tag_name
     else:
-            results = predictor.classify_image(uuid.UUID("6c0ac084-adb6-4a3b-945c-b0b8f4cb6c4d"), "Iteration3", url)
+            results = predictor.classify_image(project_id="6c0ac084-adb6-4a3b-945c-b0b8f4cb6c4d", "Iteration3", url)
             return results.predictions[0].tag_name
 def is_even_position(element, lst):
     if element in lst:
@@ -145,7 +145,7 @@ def capture():
     # (you can save it as PNG or do any other processing)
     cv2.imwrite('captured_image.png', img)
     with open('captured_image.png', "rb") as image_contents:
-        predictions = predictor.classify_image(uuid.UUID("6c0ac084-adb6-4a3b-945c-b0b8f4cb6c4d"), "Iteration3", image_contents.read())
+        predictions = predictor.classify_image("6c0ac084-adb6-4a3b-945c-b0b8f4cb6c4d", "Iteration3", image_contents.read())
     # Save the image as PNG
     # Send the image to the backend (replace 'YOUR_BACKEND_ENDPOINT' with the actual endpoint)
     return jsonify({"status": "success","server_response": str(predictions.predictions[0].tag_name)})
