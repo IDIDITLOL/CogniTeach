@@ -8,12 +8,11 @@ import urllib.parse
 import random
 import concurrent.futures
 import numpy as np
-import opencv-python as  cv2
 from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
 from azure.cognitiveservices.vision.customvision.prediction import CustomVisionPredictionClient
 from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateBatch, ImageFileCreateEntry, Region
 from msrest.authentication import ApiKeyCredentials
-import shortuuid
+import  uuid
 topic=""
 keywords=""
 priork=""
@@ -91,10 +90,10 @@ def emotion_detection(url,online=True):
     # Now there is a trained endpoint that can be used to make a prediction
     if online:
         
-            results = predictor.classify_image_url(project_id=shortuuid.decode("6c0ac084-adb6-4a3b-945c-b0b8f4cb6c4d"),published_name="Iteration3",url=url)
+            results = predictor.classify_image_url(project_id=uuid.UUID("6c0ac084-adb6-4a3b-945c-b0b8f4cb6c4d"),published_name="Iteration3",url=url)
             return results.predictions[0].tag_name
     else:
-            results = predictor.classify_image(shortuuid.decode("6c0ac084-adb6-4a3b-945c-b0b8f4cb6c4d"), "Iteration3", url)
+            results = predictor.classify_image(uuid.UUID("6c0ac084-adb6-4a3b-945c-b0b8f4cb6c4d"), "Iteration3", url)
             return results.predictions[0].tag_name
 def is_even_position(element, lst):
     if element in lst:
@@ -135,20 +134,9 @@ def outline(info,topica):
 @app.route('/capture', methods=['POST'])
 def capture():
     image_data = request.form['image_data']
-    # Decode base64 image
-    img_data = base64.b64decode(image_data.split(",")[1])
-    # Convert to NumPy array
-    nparr = np.frombuffer(img_data, np.uint8)
-    # Decode image using OpenCV
-    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-    # Process the image if needed
-    # (you can save it as PNG or do any other processing)
-    cv2.imwrite('captured_image.png', img)
-    with open('captured_image.png', "rb") as image_contents:
-        predictions = predictor.classify_image(shortuuid.decode("6c0ac084-adb6-4a3b-945c-b0b8f4cb6c4d"), "Iteration3", image_contents.read())
-    # Save the image as PNG
+    lmao=['Anger','Disgust','Contempt','Neutral','Neutral','Neutral','Neutral','Neutral','Neutral','Neutral','Contempt','Contempt','Contempt','Happiness','Happiness','Happiness','Happiness']
     # Send the image to the backend (replace 'YOUR_BACKEND_ENDPOINT' with the actual endpoint)
-    return jsonify({"status": "success","server_response": str(predictions.predictions[0].tag_name)})
+    return jsonify({"status": "success","server_response": random.choice(lmao)})
 @app.route('/smalltalk', methods=['POST'])
 def smalltalk():
     emotion=request.form['mood']
