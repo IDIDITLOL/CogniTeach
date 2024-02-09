@@ -8,7 +8,7 @@ import urllib.parse
 import random
 import concurrent.futures
 import numpy as np
-import cv2
+import opencv-python as  cv2
 from azure.cognitiveservices.vision.customvision.training import CustomVisionTrainingClient
 from azure.cognitiveservices.vision.customvision.prediction import CustomVisionPredictionClient
 from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateBatch, ImageFileCreateEntry, Region
