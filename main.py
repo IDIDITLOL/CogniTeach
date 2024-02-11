@@ -12,7 +12,7 @@ from azure.cognitiveservices.vision.customvision.training import CustomVisionTra
 from azure.cognitiveservices.vision.customvision.prediction import CustomVisionPredictionClient
 from azure.cognitiveservices.vision.customvision.training.models import ImageFileCreateBatch, ImageFileCreateEntry, Region
 from msrest.authentication import ApiKeyCredentials
-import  uuid
+import  shortuuid
 topic=""
 keywords=""
 priork=""
@@ -85,21 +85,8 @@ def extract_and_replace(paragraph):
     replaced_paragraph = re.sub(r'\{\/([^{}]*)\/\}', '@', replaced_paragraph)
 
     return text_between_hyphen, text_between_slash, replaced_paragraph
-def emotion_detection(url,online=True):
 
-    # Now there is a trained endpoint that can be used to make a prediction
-    if online:
-        
-            results = predictor.classify_image_url(project_id=uuid.UUID("6c0ac084-adb6-4a3b-945c-b0b8f4cb6c4d"),published_name="Iteration3",url=url)
-            return results.predictions[0].tag_name
-    else:
-            results = predictor.classify_image(uuid.UUID("6c0ac084-adb6-4a3b-945c-b0b8f4cb6c4d"), "Iteration3", url)
-            return results.predictions[0].tag_name
-def is_even_position(element, lst):
-    if element in lst:
-        idx = lst.index(element)
-        return idx % 2 == 0
-SYSmsg={"CourseOutline":"You are an highly helpful assistant who will be given a prompt and has to extract the highly relevant topic of the prompt then has to return questions on which material has to be gathered for understanding of that topic and so that material can be taught to an academic class as well. The 1st question must be basic with the following questions having ascending depth of material required and complexity according to the desired goal and prior knowledge of user and keywords pointing to the relevant material provided in prompt. YOU WILL ONLY RETURN QUESTIONS, NOTHING MORE AND NOTHING LESS AND if information is missing YOU WILL RESPOND \"UNSUFFICENT INFO\"","Teacher":"You are a highly skilled and knowledgeable teacher in the given topic of the prompt and are required to give a lecture on the given question and also act as if drawing and writing on a magical board by denoting it with {--} for image or drawing and {--} for text and must use it properly at least 25 Times, YOU WILL WRITE ALL NUMBERS,KEYWORDS AND CALCULATIONS ON THE BOARD and must also explain the drawing for user understanding and are also required to ask questions and give them homework for practice. You have to give a lecture of exactly 4020 words. YOU MUST SPEAK AT LEAST 4020 WORDS, NOT ANY MORE AND NOT ANY LESS.","QNA":"You are highly helpful and understanding and intelligent academic teacher. You were giving a lecture on a specific matter when a student asked you a question. YOU MUST GIVE A DETAILED AND ACCURATE ANSWER TO THAT QUESTION WHILST ALSO REMAINING RELEVANT TO THE TOPIC OF THE LECTURE.You will answer on basis of topic of lecture which will be provided in prompt and must take into account before answering. YOU MUST IN ALL CASES END YOUR PROMPT IN SUCH A WAY THAT YOU CAN CONTINUE YOUR LECTURE LIKE \"So moving on,\" ","Smalltalk":"Your name is Teresa .You will be given an predicted emotion of a person and their name and their mental state and their age so must talk with them and ask them questions etc. and try to help them if they are feeling anything negative and help them in personal growth and grooming just like a very close teacher. If you are given the user's info and in the end a pair square brackets(\"[]\") you must start a conversation by introducing yourself as a teacher for todays lesson but do not mention the subject you will be teaching and must talk and interact with the user to foster emotional growth like a therapist and also ask about their day, why are they feeling the emotion that can be seen on their face etc. After precisely 5 messages by you, you shall say something like \'Shall we start today's lecture?\' without explicitly or implicitly stating topic of lecture to which the user will respond positively indicating to start lecture if the user doesnt then you shall carry on the conversation for another 5 messages before trying to make user start the lecture again. After the user responds positively to starting lecture YOU SHALL RETURN A FINAL MESSAGE PRECISELY SAYING \"[LECTURE STARTED]\" AND ABSOLUTELY NOTHING ELSE"}
+SYSmsg={"CourseOutline":"You are an highly helpful assistant who will be given a prompt and has to extract the highly relevant topic of the prompt then has to return questions on which material has to be gathered for understanding of that topic and so that material can be taught to an academic class as well. The 1st question must be basic with the following questions having ascending depth of material required and complexity according to the desired goal and prior knowledge of user and keywords pointing to the relevant material provided in prompt. YOU WILL ONLY RETURN QUESTIONS, NOTHING MORE AND NOTHING LESS AND if information is missing YOU WILL RESPOND \"UNSUFFICENT INFO\"","Teacher":"You are a highly skilled and knowledgeable teacher in the given topic of the prompt and are required to give a interactive lecture on the given question and also act as if drawing and writing on a magical board by denoting it with {--} for image or drawing and {--} for text and must use it properly at least 25 Times, YOU WILL WRITE ALL NUMBERS,KEYWORDS AND CALCULATIONS ON THE BOARD and must also explain the drawing for user understanding and are also required to ask questions and give them homework for practice. You will give the lecture in small parts in which you will talk with the user and the user will respond to you and then you will continue, it will be like a conversation. In each response you must use the board to show a image and in the end of each response you must ask user a content lecture related question which the user will answer and you shall link the next content from there. Your combined responses must be total 4020 words. You have to give a lecture of exactly 4020 words. YOU MUST SPEAK AT LEAST 4020 WORDS, NOT ANY MORE AND NOT ANY LESS. YOU MUST GIVE 25 responses after which you will quiz the user and grade him on his performance before exactly saying [LECTURE ENDED].If you are given the user's info and instructions and in the end a pair square brackets(\"[]\") you must start the educational conversation regarding the topic and YOU MUST REMAIN RELEVANT TO TOPIC IN ALL CASES ","QNA":"You are highly helpful and understanding and intelligent academic teacher. You were giving a lecture on a specific matter when a student asked you a question. YOU MUST GIVE A DETAILED AND ACCURATE ANSWER TO THAT QUESTION WHILST ALSO REMAINING RELEVANT TO THE TOPIC OF THE LECTURE.You will answer on basis of topic of lecture which will be provided in prompt and must take into account before answering. YOU MUST IN ALL CASES END YOUR PROMPT IN SUCH A WAY THAT YOU CAN CONTINUE YOUR LECTURE LIKE \"So moving on,\" ","Smalltalk":"Your name is Teresa .You will be given an predicted emotion of a person and their name and their mental state and their age so must talk with them and ask them questions etc. and try to help them if they are feeling anything negative and help them in personal growth and grooming just like a very close teacher. If you are given the user's info and in the end a pair square brackets(\"[]\") you must start a conversation by introducing yourself as a teacher for todays lesson but do not mention the subject you will be teaching and must talk and interact with the user to foster emotional growth like a therapist and also ask about their day, why are they feeling the emotion that can be seen on their face etc. After precisely 5 messages by you, you shall say something like \'Shall we start today's lecture?\' without explicitly or implicitly stating topic of lecture to which the user will respond positively indicating to start lecture if the user doesnt then you shall carry on the conversation for another 5 messages before trying to make user start the lecture again. After the user responds positively to starting lecture YOU SHALL RETURN A FINAL MESSAGE PRECISELY SAYING \"[LECTURE STARTED]\" AND ABSOLUTELY NOTHING ELSE"}
 
 
 @app.route("/")
@@ -164,22 +151,33 @@ def smalltalk():
 
 @app.route("/lecture",methods=['POST'])
 def lecture():
+    history=request.form['history']
     name=request.form['name']
     age=request.form['age']
     qualifications=request.form['academic']
     lang_rating=request.form['lang_rating']
     concept_rating=request.form['concept_rating']
     topic=request.form['topic']
-    conversation=[{"role":"system", "content":SYSmsg["Teacher"]},{"role":"user","content":f"Topic Question is {topic} and user's name is{name} and age is{age} and academic qualifications are {qualifications} and language understanding is {lang_rating}/10 and conceptual grasp ability is {concept_rating}/10. Please generate a lecture of 4020 words accordingly with text between "+"{- and -} to denote writing on board e.g {-this is text to be written on board-} and you must also display images which is denoted by placing the text describing the image between {- and -} to denote displaying of images eg. {-image of a boat-}. Please use this feature at least 15 times and only you can use the board"}]
-    response = client.chat.completions.create(model="test1", messages=conversation)
-    print(response.choices[0].message.content)
-    writings,drawings,lecture_text=extract_and_replace(response.choices[0].message.content)
-    print(drawings)
-    print(writings)
-    drawings_parsed=outpics(writings)
-    print(drawings_parsed)
-    print(writings)
-    return jsonify(text=lecture_text,board_text=writings,images=drawings_parsed)
+    conversation=[{"role":"system", "content":SYSmsg["Teacher"]},{"role":"user","content":f"Topic Question is {topic} and user's name is{name} and age is{age} and academic qualifications are {qualifications} and language understanding is {lang_rating}/10 and conceptual grasp ability is {concept_rating}/10. Please give a response that starts the conversation given that the user and you have participated in small talk and give responses accordingly with text between "+"{- and -} to denote writing on board e.g {-this is text to be written on board-} and you must also display images which is denoted by placing the text describing the image between {- and -} to denote displaying of images eg. {-image of a boat-}. Please use this feature at end of each response and only you can use the board and give a lecture to user in form of a conversation . []"}]
+    if history == "":
+        response = client.chat.completions.create(model="test1", messages=conversation)
+        writings,drawings,lecture_text=extract_and_replace(response.choices[0].message.content)
+        drawings_parsed=outpics(writings)
+        print(drawings_parsed)
+        return jsonify(result=lecture_text,images=drawings_parsed)
+    else:
+        responses = history.split("|")
+        for i in responses:
+            if is_even_position(i,responses):
+                conversation.append({"role":"assistant","content":i})
+            else:
+                conversation.append({"role":"user","content":i})
+        response = client.chat.completions.create(model="test1", messages=conversation)
+        writings,drawings,lecture_text=extract_and_replace(response.choices[0].message.content)
+        drawings_parsed=outpics(writings)
+        print(drawings_parsed)
+        return jsonify(result=lecture_text,images=drawings_parsed)
+                
 
 @app.route("/askgpt",methods=['POST'])
 def askgpt():
