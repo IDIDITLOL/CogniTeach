@@ -1,12 +1,20 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webcam Screenshot</title>
+    <title>Session</title>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
     <style>
+            body {
+        background-color: #1E1E1E;
+        color: #FFFFFF; /* Set text color to white */
+        font-family: "Montserrat", sans-serif;
+        margin: 0;
+        padding: 0;
+    }
         /* CSS to hide the elements initially */
         .hide {
           display: none;
@@ -14,20 +22,92 @@
         .display{
             display: inline;
         }
+        nav {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 8vh;
+        background-color: #222;
+        font-family: "Montserrat", sans-serif !important;
+    }
+    .heading {
+        color: #70E72B; /* Greenish color */
+        text-transform: uppercase;
+        font-size: 24px;
+        margin: 0;
+    }
+    input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #555;
+        border-radius: 5px;
+        background-color: #444;
+        color: #FFFFFF;
+        margin-bottom: 10px;
+    }
     </style>
 </head>
 <body>
-    <h1>Webcam Screenshot</h1>
+    <nav>
+        <div class="heading" href="{{ url_for("dashboard")}}">
+            CogniTeach
+        </div>
+    </nav>
     <audio id="responseAudio" class="hide"></audio>
-    <video id="webcam" width="640" height="480" autoplay></video>
-    <button id="captureBtn">Start Lesson</button>
-    <input id="userResponse" class="hide">
-    <button id="send" class="hide">Send</button>
-    <input id="userResponse2" class="hide">
-    <button id="pause" class="hide">Respond</button>
-    <button id="startRecognizeOnceAsyncButton">Speech to text</button>
+    <div style="text-align: center;">
+        <video id="webcam" width="640" height="480" autoplay style="margin: 0 auto;"></video>
+        <button id="captureBtn" style="background-color: #70E72B; 
+        color: #FFFFFF;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+        margin-top: 20px; transform: translate(-350px,50px);">Start Lesson</button>
+    </div>
+    <div id="scrollableDiv" class="hide" style="overflow-y:scroll; height:600px; width:600px;float: right;border: 1px solid #757575;
+    border-radius: 5px;background-color: #1b1b1b">
     <div id="History" class="hide"></div>
     <div id="responseContainer"></div>
+    <input id="userResponse" style="        width:75%;
+    padding: 10px;
+    border: 1px solid #555;
+    border-radius: 5px;
+    background-color: #444;
+    color: #FFFFFF;
+    margin-bottom: 10px;margin-left: 10px;" class="hide" placeholder="Type response here">
+    <button id="send" style="background-color: #70E72B; 
+    color: #FFFFFF;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    margin-top: 20px;;" class="hide"><i class="fas fa-paper-plane"></i></button>
+    <input id="userResponse2" style="        width: 75%;
+    padding: 10px;
+    border: 1px solid #555;
+    border-radius: 5px;
+    background-color: #444;
+    color: #FFFFFF;
+    margin-bottom: 10px;margin-left: 10px;"  class="hide" placeholder="Type response here">
+    <button id="pause" style="background-color: #70E72B; 
+    color: #FFFFFF;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    margin-top: 20px;" class="hide"><i class="fas fa-paper-plane"></i></button>
+    <button id="startRecognizeOnceAsyncButton" style="background-color: #70E72B; 
+    color: #FFFFFF;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    margin-top: 20px;" class="hide"><i class="fas fa-microphone"></i></button>
+    </div>
     <div id="board_writings_area"></div>
     <div id="images_display" class="hide">
         <img id="img1" height="300px" width="300px">
@@ -99,7 +179,6 @@
         document.addEventListener('DOMContentLoaded', (event) => {
             const video = document.getElementById('webcam');
             const captureBtn = document.getElementById('captureBtn');
-            const responseContainer = document.getElementById('responseContainer');
 
             // Get user media
             navigator.mediaDevices.getUserMedia({ video: true })
@@ -126,7 +205,6 @@
                     console.log(response);
                     var lol=JSON.stringify(response,null,2);
                     var JSON_object=JSON.parse(lol);
-                    responseContainer.innerText = JSON_object.server_response;
                     document.cookie = "mood=" + JSON_object.server_response + "; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/";
                 });
             });
@@ -161,6 +239,8 @@
       var element6= document.getElementById("send");
       var element7= document.getElementById("images_display")
       var element8=document.getElementById("startRecognizeOnceAsyncButton")
+      var element9=document.getElementById("scrollableDiv")
+      element9.classList.toggle("display")
       elementToHide3.classList.toggle("hide");
       element4.classList.toggle("display");
       element5.classList.toggle("display");
@@ -215,13 +295,17 @@
     const words = longString.split(' ');
     let currentIndex = 0;
     let paused = false;
+    var scrollableDiv = document.getElementById("scrollableDiv");
 
     // Function to add a line to the target div
     function addWords() {
         if (!paused && currentIndex < words.length) {
-            const paragraph = document.createElement('p');
+            const paragraph = document.createElement('p')
+            paragraph.style.textAlign="left"
+            paragraph.style.backgroundColor="#6CC532";
             paragraph.textContent = words.slice(currentIndex, currentIndex + maxWordsPerLine).join(' ');
             document.getElementById(targetDivId).appendChild(paragraph);
+            scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
             currentIndex += maxWordsPerLine;
         }
     }
@@ -247,8 +331,12 @@
 }
     function query(){
         let lecture_text=""
+        var heading=document.createElement("h4")
+        heading.innerText=name +" :"
         let display_response=document.createElement("p");
         display_response.innerText=element9.value;
+        display_response.style.backgroundColor="#3296C5";
+        history_container.appendChild(heading);
         history_container.appendChild(display_response);
         if (history_container.children.length > 0) {
         const divElement = document.getElementById('History');
@@ -280,6 +368,9 @@
                 console.log(answer)
                 var image_array=JSON_object.images
                 if(answer.includes("&")){displayImages(image_array)}
+                var heading=document.createElement("h4")
+                heading.innerText="Teresa :"
+                history_container.appendChild(heading);
                 displayWordsInDiv(answer,12,"History",2000)
             }
         )};
@@ -296,8 +387,13 @@
     function smalltalk(History){
         let herstory=""
         if (History==true){
+            var heading=document.createElement("h4")
+            heading.innerText=name +" :"
             let display_response=document.createElement("p");
         display_response.innerText=user_input.value;
+        display_response.style.textAlign="left"
+        display_response.style.backgroundColor="#6CC532";
+        history_container.appendChild(heading);
         history_container.appendChild(display_response);
         const divElement = document.getElementById('History');
         // Get all <p> tags within the div
@@ -322,8 +418,12 @@
                     console.log(response);
                     var lol=JSON.stringify(response,null,2);
                     var JSON_object=JSON.parse(lol);
+                    var heading=document.createElement("h4")
+                    heading.innerText="Teresa :"
                     var display_response=document.createElement("p");
                     display_response.innerText=JSON_object.result;
+                    display_response.style.backgroundColor="#3296C5";
+                    history_container.appendChild(heading);
                     history_container.appendChild(display_response);
                     if (display_response.innerText.includes("[LECTURE STARTED]")){lecture_started()}
                     else {speakText(JSON_object.result)}
