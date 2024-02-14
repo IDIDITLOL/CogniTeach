@@ -76,7 +76,6 @@
       var gender= document.getElementById('gender').value;
       var disability = document.getElementById('disability').value;
       var randomNumber = parseInt(lang_rating)+parseInt(concept_rating);
-      var understanding=randomNumber/2
 
       // Set a cookie with the input data
       document.cookie = "name=" + Name + "; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/";
@@ -87,7 +86,7 @@
       document.cookie = "concept_rating=" + concept_rating + "; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/";
       document.cookie = "mood=" + "neutral" + "; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/";
       document.cookie = "mentalstate=" + "Normal" + "; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/";
-      document.cookie = "understand=" + understanding.toString() + "; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/";
+      document.cookie = "understand=" + "0" + "; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/";
       document.cookie = "lessons=0;expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/";
       document.cookie = "gender="+gender+";expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/";
       document.cookie = "disability="+disability+";expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/";
@@ -104,6 +103,12 @@
     </nav>
     <div class="container">
         <h2>Details</h2>
+        <p>Email</p>
+        <input type="text" placeholder="someone@example.com">
+        <p>Password</p>
+        <input type="text" placeholder="At least 8 characters">
+        <p>Re-enter Password</p>
+        <input type="text" placeholder="Both passwords must match">
         <p>Name</p>
         <input type="text" id="Name" placeholder="First name only">
         <p>Age</p>
