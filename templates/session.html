@@ -107,7 +107,16 @@
     cursor: pointer;
     text-decoration: none;
     margin-top: 20px;" class="hide"><i class="fas fa-microphone"></i></button>
+    <button id="quit" style="background-color: #70E72B; 
+    color: #FFFFFF;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    margin-top: 20px;" class="hide">Back To dashboard</button>
     </div>
+    <
     <div id="board_writings_area"></div>
     <div id="images_display" class="hide">
         <img id="img1" height="300px" width="300px">
@@ -118,7 +127,17 @@
             var phraseDiv;
             var phraseDiv2;
     var startRecognizeOnceAsyncButton=document.getElementById("startRecognizeOnceAsyncButton");
-
+    function getRandomNumber(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    if (max < min) {
+        // Swap min and max
+        const temp = min;
+        min = max;
+        max = temp;
+    }
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
     // subscription key and region for speech services.
     var audioElement=document.getElementById("responseAudio")
     var subscriptionKey, serviceRegion;
@@ -268,6 +287,7 @@
     var mood = getCookie("mood");
     var state = getCookie("mentalstate");
     var concept = getCookie("concept_rating");
+    var attention= getCookie("attention")
     var language= getCookie("lang_rating");
     var history_container=document.getElementById("History");
     var user_input=document.getElementById("userResponse");
@@ -290,6 +310,20 @@
         img3.src=image_array[0][2]
         console.log("images_displayed")
     }
+    function end_lecture(){
+        var understanding=getRandomNumber(Number(language),Number(concept))
+        language=Number(language)+(getRandomNumber(-10,10)/10)
+        concept=Number(concept)+(getRandomNumber(-10,-10)/10)
+        attention=getRandomNumber(5,35)
+        var understanding=getRandomNumber(Number(language),Number(concept))
+        document.cookie = "understand=" + understanding.toString() + "; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/";
+        document.cookie = "lang_rating=" + language.toString() + "; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/";
+        document.cookie = "concept_rating=" + concept.toString() + "; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/";
+        document.cookie = "attention=" + attention.toString() + "; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/";
+        var back=document.getElementById("quit");
+        back.classList.toggle("display")
+        back.addEventListener('click',function(){window.location.href = "{{ url_for('dashboard')}}";})
+    }
     
     function displayWordsInDiv(longString, maxWordsPerLine, targetDivId, intervalTime) {
     const words = longString.split(' ');
@@ -298,17 +332,18 @@
     var scrollableDiv = document.getElementById("scrollableDiv");
 
     // Function to add a line to the target div
-    function addWords() {
-        if (!paused && currentIndex < words.length) {
-            const paragraph = document.createElement('p')
-            paragraph.style.textAlign="left"
-            paragraph.style.backgroundColor="#6CC532";
-            paragraph.textContent = words.slice(currentIndex, currentIndex + maxWordsPerLine).join(' ');
-            document.getElementById(targetDivId).appendChild(paragraph);
-            scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
-            currentIndex += maxWordsPerLine;
-        }
+    // Function to add a line to the target div
+function addWords() {
+    if (!paused && currentIndex < words.length) {
+        const paragraph = document.createElement('p');
+        paragraph.style.textAlign = "left";
+        paragraph.style.backgroundColor = "#6CC532";
+        paragraph.textContent = words.slice(currentIndex, currentIndex + maxWordsPerLine).join(' ');
+        document.getElementById(targetDivId).appendChild(paragraph);
+        scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
+        currentIndex += maxWordsPerLine;
     }
+}
 
     // Start the interval to add words
     let intervalId;
@@ -371,7 +406,10 @@
                 var heading=document.createElement("h4")
                 heading.innerText="Teresa :"
                 history_container.appendChild(heading);
-                displayWordsInDiv(answer,12,"History",2000)
+                displayWordsInDiv(answer,12,"History",4070)
+                if (answer.includes("[LECTURE ENDED]")){
+                    end_lecture()
+                }
             }
         )};
 
