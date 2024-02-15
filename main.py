@@ -93,7 +93,7 @@ SYSmsg={"CourseOutline":"You are an highly helpful assistant who will be given a
 
 @app.route("/")
 def home():
-    return render_template("imalive.html")
+    return redirect(url_for('signup'))
 
 @app.route('/get_url', methods=['POST'])
 def get_url():
