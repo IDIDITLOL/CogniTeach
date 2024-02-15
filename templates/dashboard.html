@@ -175,7 +175,7 @@
           percentageText.innerText = percentage + '%';
         }
   
-        var understand = Math.floor(Number(getCookie("understand")));
+        var understand = Math.floor(Number(getCookie("understand"))*10);
         var concept = Number(getCookie("concept_rating"))*10;
         var language= Number(getCookie("lang_rating"))*10;
         updateLoadingBar(understand, 'progress1', 'percentage1');
