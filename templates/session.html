@@ -311,7 +311,7 @@
         console.log("images_displayed")
     }
     function end_lecture(){
-        var understanding=getRandomNumber(Number(language),Number(concept))
+        var understanding=getRandomNumber(Number(language)*10,Number(concept)*10)
         language=Number(language)+(getRandomNumber(-10,10)/10)
         concept=Number(concept)+(getRandomNumber(-10,-10)/10)
         attention=getRandomNumber(5,35)
