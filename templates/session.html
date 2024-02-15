@@ -311,11 +311,10 @@
         console.log("images_displayed")
     }
     function end_lecture(){
-        var understanding=getRandomNumber(Number(language)*10,Number(concept)*10)
         language=Number(language)+(getRandomNumber(-10,10)/10)
         concept=Number(concept)+(getRandomNumber(-10,-10)/10)
         attention=getRandomNumber(5,35)
-        var understanding=getRandomNumber(Number(language),Number(concept))
+        var understanding=getRandomNumber(Number(language)*10,Number(concept)*10)
         document.cookie = "understand=" + understanding.toString() + "; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/";
         document.cookie = "lang_rating=" + language.toString() + "; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/";
         document.cookie = "concept_rating=" + concept.toString() + "; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/";
