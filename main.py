@@ -161,6 +161,7 @@ def lecture():
     lang_rating=request.form['lang_rating']
     concept_rating=request.form['concept_rating']
     topic=request.form['topic']
+    classwork=''
     conversation=[{"role":"system", "content":SYSmsg["Teacher"]},{"role":"user","content":f"Topic Question is {topic} and user's name is{name} and age is{age} and academic qualifications are {qualifications} and language understanding is {lang_rating}/10 and conceptual grasp ability is {concept_rating}/10. Please give a response that starts the conversation given that the user and you have participated in small talk and give responses accordingly with text between "+"{- and -} to denote writing on board e.g {-this is text to be written on board-} and you must also display images which is denoted by placing the text describing the image between {- and -} to denote displaying of images eg. {-image of a boat-}. Please use this feature at end of each response and only you can use the board and give a lecture to user in form of a conversation . and give end each response with a respondable question []"}]
     if history == "":
         response = client.chat.completions.create(model="test1", messages=conversation)
@@ -175,11 +176,17 @@ def lecture():
                 conversation.append({"role":"assistant","content":i})
             else:
                 conversation.append({"role":"user","content":i})
+        if len(conversation)%11==0:
+            conversation2=conversation
+            conversation2[0]['content']='YOU WILL INTERACT WITH USER AND WHEN DONE, USER WILL ASK YOU TO GIVE NOTES AND YOU SHALL GIVE NOTES IN POINT FORM OF ALL THE INFORMATION COVERED IN LECTURE SO FAR SO THE USER CAN WRITE THEM DOWN AND COME BACK TO THEM LATER FOR FURTHER REFRENCE, WHEN ASKED TO GIVE NOTES, YOU WILL ONLY RETURN NOTES AND NOTHING ELSE'
+            conversation2[-1]['content']='Please give me notes of everything studied so far in this conversation'
+            response = client.chat.completions.create(model="test1", messages=conversation2)
+            classwork=response.choices[0].message.content
         response = client.chat.completions.create(model="test1", messages=conversation)
         writings,drawings,lecture_text=extract_and_replace(response.choices[0].message.content)
         drawings_parsed=outpics(writings)
         print(drawings_parsed)
-        return jsonify(result=lecture_text,images=drawings_parsed)
+        return jsonify(result=lecture_text,images=drawings_parsed,notes=classwork)
                 
 
 @app.route("/askgpt",methods=['POST'])
