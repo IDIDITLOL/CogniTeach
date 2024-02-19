@@ -54,8 +54,8 @@
         </div>
     </nav>
     <audio id="responseAudio" class="hide"></audio>
-    <div style="text-align: center;">
-        <video id="webcam" width="640" height="480" autoplay style="margin: 0 auto;"></video>
+    <div style="text-align: center;" class="display" id="startpage">
+        <video id="webcam" width="640" height="480" autoplay style="margin: 0 auto; padding-left: 100px; padding-top: 30px;"></video>
         <button id="captureBtn" style="background-color: #70E72B; 
         color: #FFFFFF;
         border: none;
@@ -64,6 +64,11 @@
         cursor: pointer;
         text-decoration: none;
         margin-top: 20px; transform: translate(-350px,50px);">Start Lesson</button>
+        <div style="float: right; padding-right: 100px; padding-left: 0px; transform: translate(0,-400px); "><h1>Instructions</h1>
+            <p>Please use browser window on a computer with fullscreen</p>
+            <p>Please wait a few seconds until your camera is displayed here</p>
+            <p>Please you must interact with the AI for better learning</p></div>
+            
     </div>
     <div id="scrollableDiv" class="hide" style="overflow-y:scroll; height:600px; width:600px;float: right;border: 1px solid #757575;
     border-radius: 5px;background-color: #1b1b1b">
@@ -118,10 +123,12 @@
     </div>
     <div id="board_writings_area"></div>
     <div id="images_display" class="hide">
-        <img id="img1" height="300px" width="300px">
-        <img id="img2" height="300px" width="300px">
-        <img id="img3" height="300px" width="300px">
+        <img id="img1" height="200px" width="200px">
+        <img id="img2" height="200px" width="200px">
+        <img id="img3" height="200px" width="200px">
     </div>
+    <div id="notesDiv" class="hide" style="overflow-y:scroll; height:400px; width:600px;float: left;border: 1px solid #757575;
+    border-radius: 5px;background-color: #1b1b1b"></div>
     <script>
             var phraseDiv;
             var phraseDiv2;
@@ -258,7 +265,10 @@
       var element7= document.getElementById("images_display")
       var element8=document.getElementById("startRecognizeOnceAsyncButton")
       var element9=document.getElementById("scrollableDiv")
+      var element10=document.getElementById("notesDiv")
+      var element11=document.getElementById("startpage")
       element9.classList.toggle("display")
+      element10.classList.toggle("display")
       elementToHide3.classList.toggle("hide");
       element4.classList.toggle("display");
       element5.classList.toggle("display");
@@ -267,6 +277,7 @@
       element8.classList.toggle("display");
       elementToHide1.remove();
       elementToHide2.remove();
+      element11.remove();
     }
     function getCookie(name) {
           var cookies = document.cookie.split(';');
@@ -302,6 +313,7 @@
     var img3=document.getElementById('img3')
     var text_display_array=[]
     var lecture_history=''
+    var notes_div=document.getElementById("notesDiv")
     function displayImages(image_array){
         console.log("images_selected")
         img1.src=image_array[0][0]
@@ -399,6 +411,11 @@ function addWords() {
                 var answer=JSON_object.result;
                 speakText(answer)
                 console.log(answer)
+                if  (JSON_object.notes!=""){
+                    var newnotes=document.createElement("p")
+                    newnotes.innerText=JSON_object.notes
+                    notes_div.appendChild(newnotes)
+                }
                 var image_array=JSON_object.images
                 if(answer.includes("&")){displayImages(image_array)}
                 var heading=document.createElement("h4")
