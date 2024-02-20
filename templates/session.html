@@ -411,11 +411,11 @@ function addWords() {
                 var answer=JSON_object.result;
                 speakText(answer)
                 console.log(answer)
-                if  (JSON_object.notes!=""){
-                    var newnotes=document.createElement("p")
-                    newnotes.innerText=JSON_object.notes
-                    notes_div.appendChild(newnotes)
-                }
+                console.log(JSON_object.board_text)
+                var element10=document.getElementById("notesDiv")
+                var newnotes=document.createElement("p")
+                newnotes.innerText=JSON_object.board_text
+                element10.appendChild(newnotes)
                 var image_array=JSON_object.images
                 if(answer.includes("&")){displayImages(image_array)}
                 var heading=document.createElement("h4")
