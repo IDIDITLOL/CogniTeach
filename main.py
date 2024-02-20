@@ -55,26 +55,25 @@ def is_image_url(url):
 def check_image_urls(urls):
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:  # Adjust max_workers as needed
         results = list(executor.map(is_image_url, urls))
-def outpics(list1):
+def outpics(it):
     output=[]
-    for i in list1:
-        result_clipart = searchParse(i, imageType='Clipart',count=6)
-        result_photo = searchParse(i, imageType='Photo',count=6)
-        result_line = searchParse(i, imageType='Line',count=6)
-        for i in result_clipart:
+    result_clipart = searchParse(it, imageType='Clipart',count=6)
+    result_photo = searchParse(it, imageType='Photo',count=6)
+    result_line = searchParse(it, imageType='Line',count=6)
+    for i in result_clipart:
             if not check_image_urls(i):
                 result_clipart.remove(i)
-        for i in result_photo:
+    for i in result_photo:
             if not check_image_urls(i):
                 result_photo.remove(i)
-        for i in result_line:
+    for i in result_line:
             if not check_image_urls(i):
                 result_line.remove(i)
-        final=[]
-        final.append(random.choice(result_clipart))
-        final.append(random.choice(result_photo))
-        final.append(random.choice(result_line))
-        output.append(final)
+    final=[]
+    final.append(random.choice(result_clipart))
+    final.append(random.choice(result_photo))
+    final.append(random.choice(result_line))
+    output.append(final)
     return output
 def extract_and_replace(paragraph):
     text_between_hyphen = re.findall(r'\{-([^{}]*)-\}', paragraph)
@@ -176,17 +175,15 @@ def lecture():
                 conversation.append({"role":"assistant","content":i})
             else:
                 conversation.append({"role":"user","content":i})
-        if len(conversation)%11==0:
-            conversation2=conversation
-            conversation2[0]['content']='YOU WILL INTERACT WITH USER AND WHEN DONE, USER WILL ASK YOU TO GIVE NOTES AND YOU SHALL GIVE NOTES IN POINT FORM OF ALL THE INFORMATION COVERED IN LECTURE SO FAR SO THE USER CAN WRITE THEM DOWN AND COME BACK TO THEM LATER FOR FURTHER REFRENCE, WHEN ASKED TO GIVE NOTES, YOU WILL ONLY RETURN NOTES AND NOTHING ELSE'
-            conversation2[-1]['content']='Please give me notes of everything studied so far in this conversation'
-            response = client.chat.completions.create(model="test1", messages=conversation2)
-            classwork=response.choices[0].message.content
         response = client.chat.completions.create(model="test1", messages=conversation)
         writings,drawings,lecture_text=extract_and_replace(response.choices[0].message.content)
-        drawings_parsed=outpics(writings)
+        convo=[{"role":"system","content":"YOU WILL BE GIVEN A TEXT AND MUST RETURN WORDS OR IMPORTANT CALCULATIONS OR EQUATIONS OR KEYWORDS THAT CAN BE WRITTEN AND YOU MUST RETURN ABSOLUTELY NOTHING ELSE"},{"role":"user","content":lecture_text}]
+        board_writings=client.chat.completions.create(model="test1", messages=convo)
+        convo2=[{"role":"system","content":"YOU WILL BE GIVEN A TEXT AND MUST RETURN EXACTLY 4 WORDS THAT CAN BE SEARCHED UP AND SO A IMAGE RELATED TO THESE 4 WORDS CAN BE DISPLAYED AND YOU MUST RETURN ABSOLUTELY NOTHING ELSE"},{"role":"user","content":lecture_text}]
+        board_images=client.chat.completions.create(model="test1", messages=convo2)
+        drawings_parsed=outpics(board_images.choices[0].message.content)
         print(drawings_parsed)
-        return jsonify(result=lecture_text,images=drawings_parsed,notes=classwork)
+        return jsonify(result=lecture_text,images=drawings_parsed,board_text=board_writings.choices[0].message.content)
                 
 
 @app.route("/askgpt",methods=['POST'])
